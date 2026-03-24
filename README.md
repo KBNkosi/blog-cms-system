@@ -6,45 +6,126 @@
 
 This project is designed as a hands-on learning experience to understand and practice building production-aligned web applications without unnecessary complexity. It represents a deliberate reconstruction of fundamental patterns and architectures to solidify understanding through practical implementation.
 
-## 🏗️ What We're Building
+---
 
-A minimal but production-ready monolithic web application with:
-- User authentication system
-- Clean separation of concerns
-- Testable business logic
-- Modern Python web stack
+## 📋 Project Overview
+
+A **modular monolith** blog application built with FastAPI, demonstrating clean architecture patterns and separation of concerns. The project follows a phase-based development approach, starting with core functionality and progressively adding complexity.
+
+### Current Phase: 🚀 Phase 1 - Content System
+
+**Status:** In Progress  
+**Focus:** Core post management with proper validation and API design
+
+---
+
+## 🏗️ Architecture
+
+### System Design
+```
+Client → API Route → Service Layer → Repository → Database
+                          ↓
+                    Business Logic
+```
+
+### Project Structure
+```
+/app
+  /api              → Routes (controllers)
+  /services         → Business logic
+  /models           → Database models
+  /schemas          → Request/response validation
+  /database         → Database configuration & migrations
+  /main.py          → Application entry point
+/docs               → Project documentation
+/tests              → Test suite
+```
+
+### Core Domains
+| Domain | Status | Responsibilities |
+|--------|--------|-----------------|
+| **Content** | ✅ Active | Posts, CRUD operations, validation |
+| **Auth** | 🔄 Phase 2 | Users, JWT tokens, permissions |
+| **Engagement** | ⏳ Phase 3 | Comments, likes, bookmarks |
+| **Discovery** | ⏳ Phase 4 | Search, tags, categories, feed |
+| **System** | ⏳ Phase 5 | Caching, logging, monitoring |
+
+---
 
 ## 🛠️ Technology Stack
 
-- **Backend**: FastAPI
-- **Database**: SQLite with SQLAlchemy ORM
-- **Authentication**: Custom session-based auth
-- **Security**: bcrypt for password hashing
-- **Testing**: pytest
-- **Database Migrations**: Alembic
-- **Deployment**: uvicorn
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Framework** | FastAPI | High-performance API framework |
+| **Validation** | Pydantic | Data validation and serialization |
+| **Database** | SQLite → PostgreSQL | Data persistence (development → production) |
+| **ORM** | SQLAlchemy | Database abstraction layer |
+| **Migrations** | Alembic | Database version control |
+| **Testing** | Pytest | Automated testing framework |
 
-## 📁 Project Structure
+---
 
-```
-src/
-├── models/           # Database models (SQLAlchemy)
-├── services/         # Business logic (testable without framework)
-├── api/             # FastAPI endpoints
-├── security/        # Password hashing, session management
-└── database/        # Database connection & migrations
-```
+## 🚀 Features
 
-## 🎓 Learning Goals
+### ✅ Implemented (Phase 1)
+- **Post Management**
+  - Create posts with validation
+  - Retrieve all posts (list view)
+  - Get single post by ID
+  - Update posts (partial updates)
+  - Delete posts
+  - Proper error handling (404, validation)
+  - Response models for API consistency
 
-This project focuses on mastering these core concepts:
+### 🔄 In Progress
+- **Data Persistence**
+  - Database models setup
+  - Migration scripts
+  - Repository layer implementation
 
-1. **Clean Architecture** - Understanding proper separation of concerns
-2. **Testable Design** - Writing business logic that's easy to test
-3. **Database Design** - Working with ORMs and migrations
-4. **API Development** - Building RESTful endpoints
-5. **Security Fundamentals** - Implementing authentication safely
-6. **Production Thinking** - Building maintainable, scalable code
+### ⏳ Planned (Future Phases)
+- **Authentication System**
+  - User registration/login
+  - JWT token management
+  - Role-based access control
+- **Engagement Features**
+  - Comments system
+  - Like/unlike functionality
+  - User bookmarks
+- **Discovery & Search**
+  - Tag system
+  - Full-text search
+  - Content feed
+- **Production Features**
+  - Caching layer
+  - Rate limiting
+  - Background jobs
+
+---
+
+## 📁 Key Design Principles
+
+### 1. **Separation of Concerns**
+- Routes handle HTTP concerns only
+- Services contain business logic
+- Repositories manage data access
+
+### 2. **Schema-Driven Development**
+- Input validation with Pydantic schemas
+- Clear separation between input/output models
+- Type safety throughout the application
+
+### 3. **Iterative Complexity**
+- Start with core functionality
+- Add features incrementally
+- Maintain clean architecture at each phase
+
+### 4. **Error-First Design**
+- Explicit error handling
+- Proper HTTP status codes
+- Consistent error responses
+
+---
 
 ## 🚀 Getting Started
 
@@ -53,62 +134,163 @@ This project focuses on mastering these core concepts:
 - Virtual environment (recommended)
 
 ### Installation
-
-1. Clone the repository
-2. Create and activate a virtual environment
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Set up the database:
-   ```bash
-   alembic upgrade head
-   ```
-
-5. Run the application:
-   ```bash
-   uvicorn main:app --reload
-   ```
-
-### Running Tests
-
 ```bash
-pytest tests/
+# Clone the repository
+git clone <repository-url>
+cd monolithic-app-rebuild
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-## 📚 Documentation
+### Running the Application
+```bash
+# Start the development server
+uvicorn app.main:app --reload
 
-- [Minimal Architecture Plan](docs/minimal_architecture_plan.md) - Detailed design decisions and rationale
-- [Three Level Context Model](docs/Three_Level_Context_Model_Template.md) - Context mapping framework
-- [Learnings](docs/learnings.md) - Key insights and discoveries
+# Access the API
+# Swagger UI: http://localhost:8000/docs
+# ReDoc: http://localhost:8000/redoc
+```
 
-## 🎯 Core Philosophy
-
-**Build the simplest thing that works, but make it production-ready.**
-
-- Fewer layers, more direct value
-- Abstractions only when they solve real problems
-- Learning-focused, not enterprise-focused
-- Add complexity only when needed
-
-## 📋 Current Status
-
-This is an active learning project. The implementation follows a phased approach:
-
-- ✅ **Phase 1**: Core Models & Database
-- 🔄 **Phase 2**: Business Logic
-- ⏳ **Phase 3**: API Layer
-- ⏳ **Phase 4**: Integration & Polish
-
-## 🤝 Contributing
-
-This is primarily a personal learning project, but insights and suggestions are welcome! The focus is on understanding and reinforcing fundamental concepts rather than building a production system for external use.
-
-## 📄 License
-
-This project is for educational purposes. Feel free to use it for learning, but it's not intended for production deployment without significant enhancements.
+### Database Setup
+```bash
+# Run database migrations
+alembic upgrade head
+```
 
 ---
 
-**Remember**: The goal is learning, not perfection. Every line of code should reinforce understanding of core software engineering principles.
+## 📚 API Documentation
+
+### Current Endpoints
+
+#### Posts
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/posts` | Create a new post |
+| `GET` | `/posts` | Get all posts |
+| `GET` | `/posts/{id}` | Get single post |
+| `PUT` | `/posts/{id}` | Update post |
+| `DELETE` | `/posts/{id}` | Delete post |
+
+### Request/Response Models
+
+#### PostCreate
+```python
+{
+    "title": "string (1-200 chars)",
+    "content": "string (1-5000 chars)"
+}
+```
+
+#### PostResponse
+```python
+{
+    "id": 1,
+    "title": "string",
+    "content": "string",
+    "author_id": 1,
+    "created_at": "2024-01-15T10:30:00",
+    "updated_at": null
+}
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app
+
+# Run specific test file
+pytest tests/test_posts.py
+```
+
+---
+
+## 📈 Development Phases
+
+### Phase 1: Content System ✅
+- [x] Post CRUD operations
+- [x] Schema validation
+- [x] Error handling
+- [x] API documentation
+
+### Phase 2: Authentication 🔄
+- [ ] User models
+- [ ] JWT implementation
+- [ ] Protected routes
+- [ ] Role management
+
+### Phase 3: Engagement ⏳
+- [ ] Comments system
+- [ ] Like functionality
+- [ ] User interactions
+
+### Phase 4: Discovery ⏳
+- [ ] Search implementation
+- [ ] Tag system
+- [ ] Content feed
+
+### Phase 5: Production ⏳
+- [ ] Caching layer
+- [ ] Rate limiting
+- [ ] Monitoring
+
+---
+
+## 🤝 Contributing
+
+This is a learning project. Feel free to:
+- Study the code structure
+- Suggest improvements
+- Report issues
+- Ask questions about architecture decisions
+
+---
+
+## 📝 Learning Outcomes
+
+**Key Concepts Practiced:**
+- Clean architecture patterns
+- RESTful API design
+- Data validation with Pydantic
+- Database migrations with Alembic
+- Error handling strategies
+- Separation of concerns
+- Type safety in Python
+
+**Architecture Patterns:**
+- Modular monolith design
+- Repository pattern
+- Service layer pattern
+- Schema-driven development
+
+---
+
+## 📄 License
+
+This project is for educational purposes. Feel free to use and modify for learning.
+
+---
+
+## 🔮 Future Considerations
+
+- **Microservices Migration:** How to split monolith into services
+- **Performance Optimization:** Caching strategies, query optimization
+- **Security Enhancements:** Input validation, authentication patterns
+- **Scalability Patterns:** Horizontal scaling, load balancing
+- **Monitoring:** Logging, metrics, health checks
+
+---
+
+*Built with ❤️ for learning clean software engineering practices*
