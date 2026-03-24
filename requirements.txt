@@ -1,0 +1,8 @@
+fastapi
+pydantic
+sqlalchemy
+bcrypt
+alembic
+pytest
+uvicorn
+aiosqlite

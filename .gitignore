@@ -1,0 +1,19 @@
+# environment files
+.venv 
+*.env
+
+# Python files
+__pycache__
+*.pyc
+
+# Database files
+*.db 
+
+# Alembic migrations (generated files)
+app/database/migrations/versions/*.py
+!app/database/migrations/versions/__init__.py
+
+# VSCode files
+.vscode/
+
+
