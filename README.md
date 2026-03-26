@@ -2,24 +2,69 @@
 
 ## 🎯 Purpose
 
-**This is a learning project - an independent rebuild to reinforce core software engineering concepts.**
+This project is a deliberate implementation of a backend system designed to reinforce
+core software engineering concepts through practical application.
 
-This project is designed as a hands-on learning experience to understand and practice building production-aligned web applications without unnecessary complexity. It represents a deliberate reconstruction of fundamental patterns and architectures to solidify understanding through practical implementation.
+The goal is to build a production-aligned blog platform from first principles, focusing on:
+- clear system structure
+- separation of concerns
+- maintainable architecture
+- incremental system design
+
+Rather than building features in isolation, this project approaches development as a system,
+where each component fits into a broader architecture.
 
 ---
 
 ## 📋 Project Overview
 
-A **modular monolith** blog application built with FastAPI, demonstrating clean architecture patterns and separation of concerns. The project follows a phase-based development approach, starting with core functionality and progressively adding complexity.
+A **backend-focused blog platform** built using a **modular monolith architecture**.
 
-### Current Phase: 🚀 Phase 1 - Content System
+The system is designed to simulate how real-world applications evolve — starting with a
+core domain and progressively expanding into additional subsystems such as authentication,
+engagement, and discovery.
 
+Development follows a **phase-based approach**, ensuring each layer is implemented with
+clarity before introducing additional complexity.
+
+---
+
+## 📋 Project Overview
+
+A **backend-focused blog platform** built using a **modular monolith architecture**.
+
+The system is designed to simulate how real-world applications evolve — starting with a
+core domain and progressively expanding into additional subsystems such as authentication,
+engagement, and discovery.
+
+Development follows a **phase-based approach**, ensuring each layer is implemented with
+clarity before introducing additional complexity.
+
+---
+## 🚧 Current Status
+
+**Phase:** Content System (Phase 1)  
 **Status:** In Progress  
-**Focus:** Core post management with proper validation and API design
+
+### Current Focus
+- Implementing data persistence using SQLAlchemy
+- Structuring repository layer for database access
+- Ensuring consistency between schemas, services, and models
+
+This phase focuses on making the system fully data-driven before introducing authentication.
 
 ---
 
 ## 🏗️ Architecture
+### Architecture Style: Modular Monolith
+
+The system is structured as a modular monolith — internally organized into clear domains
+and layers, while deployed as a single unit.
+
+This approach:
+- avoids premature complexity of microservices
+- maintains clean separation between components
+- allows future scalability without over-engineering early
 
 ### System Design
 ```
@@ -27,6 +72,14 @@ Client → API Route → Service Layer → Repository → Database
                           ↓
                     Business Logic
 ```
+| Layer | Responsibility |
+|------|----------------|
+| **API Layer** | Handles HTTP requests and routing |
+| **Service Layer** | Contains business logic and rules |
+| **Repository Layer** | Manages data access and persistence |
+| **Database Layer** | Stores application data |
+
+Each layer is isolated to ensure maintainability and testability.
 
 ### Project Structure
 ```
@@ -40,6 +93,30 @@ Client → API Route → Service Layer → Repository → Database
 /docs               → Project documentation
 /tests              → Test suite
 ```
+
+## 🧠 Key Design Decisions
+
+### Why Modular Monolith?
+- Keeps deployment simple while maintaining internal structure
+- Avoids early complexity of distributed systems
+- Enables gradual evolution into more complex architectures if needed
+
+---
+
+### Why Start with Content Instead of Authentication?
+- Content is the core business domain of the system
+- Allows validation of data flow and architecture before adding security layers
+- Prevents over-engineering authentication too early
+
+---
+
+### Why Service + Repository Pattern?
+- Separates business logic from data access
+- Improves testability and maintainability
+- Prevents tightly coupled code as the system grows
+
+---
+
 
 ### Core Domains
 | Domain | Status | Responsibilities |
@@ -68,63 +145,25 @@ Client → API Route → Service Layer → Repository → Database
 ## 🚀 Features
 
 ### ✅ Implemented (Phase 1)
-- **Post Management**
-  - Create posts with validation
-  - Retrieve all posts (list view)
-  - Get single post by ID
-  - Update posts (partial updates)
-  - Delete posts
-  - Proper error handling (404, validation)
-  - Response models for API consistency
+- **Post Management**  
+- Post CRUD operations
+- Request validation using Pydantic
+- Structured API responses
+- Error handling with proper HTTP status codes
+- API documentation via FastAPI
 
 ### 🔄 In Progress
 - **Data Persistence**
-  - Database models setup
-  - Migration scripts
-  - Repository layer implementation
+- Database models and persistence layer
+- Repository implementation
+- Migration setup (Alembic)
 
-### ⏳ Planned (Future Phases)
-- **Authentication System**
-  - User registration/login
-  - JWT token management
-  - Role-based access control
-- **Engagement Features**
-  - Comments system
-  - Like/unlike functionality
-  - User bookmarks
-- **Discovery & Search**
-  - Tag system
-  - Full-text search
-  - Content feed
-- **Production Features**
-  - Caching layer
-  - Rate limiting
-  - Background jobs
-
----
-
-## 📁 Key Design Principles
-
-### 1. **Separation of Concerns**
-- Routes handle HTTP concerns only
-- Services contain business logic
-- Repositories manage data access
-
-### 2. **Schema-Driven Development**
-- Input validation with Pydantic schemas
-- Clear separation between input/output models
-- Type safety throughout the application
-
-### 3. **Iterative Complexity**
-- Start with core functionality
-- Add features incrementally
-- Maintain clean architecture at each phase
-
-### 4. **Error-First Design**
-- Explicit error handling
-- Proper HTTP status codes
-- Consistent error responses
-
+### ⏳ Planned 
+- Authentication system (JWT, role-based access)
+- Comments and engagement features
+- Search and tagging system
+- Caching and performance optimization
+- Background jobs and monitoring
 ---
 
 ## 🚀 Getting Started
@@ -269,13 +308,12 @@ This is a learning project. Feel free to:
 - Separation of concerns
 - Type safety in Python
 
-**Architecture Patterns:**
-- Modular monolith design
-- Repository pattern
-- Service layer pattern
-- Schema-driven development
-
 ---
+
+## 🔮 Future Considerations
+
+- **Microservices Migration:** How to split a monolith into services
+  
 
 ## 📄 License
 
@@ -283,14 +321,3 @@ This project is for educational purposes. Feel free to use and modify for learni
 
 ---
 
-## 🔮 Future Considerations
-
-- **Microservices Migration:** How to split a monolith into services
-- **Performance Optimization:** Caching strategies, query optimization
-- **Security Enhancements:** Input validation, authentication patterns
-- **Scalability Patterns:** Horizontal scaling, load balancing
-- **Monitoring:** Logging, metrics, health checks
-
----
-
-*Built with ❤️ for learning clean software engineering practices*
