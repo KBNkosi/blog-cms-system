@@ -1,4 +1,4 @@
-# Monolithic App Rebuild
+# Blog CMS System
 
 ## 🎯 Purpose
 
@@ -137,7 +137,7 @@ Client → API Route → Service Layer → Repository → Database
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd monolithic-app-rebuild
+cd blog-cms-system
 
 # Create virtual environment
 python -m venv .venv
@@ -285,7 +285,7 @@ This project is for educational purposes. Feel free to use and modify for learni
 
 ## 🔮 Future Considerations
 
-- **Microservices Migration:** How to split monolith into services
+- **Microservices Migration:** How to split a monolith into services
 - **Performance Optimization:** Caching strategies, query optimization
 - **Security Enhancements:** Input validation, authentication patterns
 - **Scalability Patterns:** Horizontal scaling, load balancing
