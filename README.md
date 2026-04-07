@@ -33,7 +33,7 @@ clarity before introducing additional complexity.
 
 A **backend-focused blog platform** built using a **modular monolith architecture**.
 
-The system is designed to simulate how real-world applications evolve — starting with a
+The system is designed to simulate how real-world applications evolve, starting with a
 core domain and progressively expanding into additional subsystems such as authentication,
 engagement, and discovery.
 
@@ -58,7 +58,7 @@ This phase focuses on making the system fully data-driven before introducing aut
 ## 🏗️ Architecture
 ### Architecture Style: Modular Monolith
 
-The system is structured as a modular monolith — internally organized into clear domains
+The system is structured as a modular monolith, internally organized into clear domains
 and layers, while deployed as a single unit.
 
 This approach:
@@ -317,7 +317,7 @@ This is a learning project. Feel free to:
 
 ## 📄 License
 
-This project is for educational purposes. Feel free to use and modify for learning.
+ This project is licensed under the MIT License; it is open for use and modification to support professional learning and development.
 
 ---
 
