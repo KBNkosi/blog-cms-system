@@ -1,41 +1,29 @@
-from app.schemas.post import PostCreate, PostUpdate, PostResponse
-from app.services.post_service import create_post, update_post, get_all_post, get_post, delete_post
+from app.schemas.post import PostCreateDraft, PostUpdateDraft, PostResponse
+from app.services.post_service import publish_post, create_post_draft
 from fastapi import APIRouter
 from typing import List
 
-router = APIRouter()
-
-# create a post
-@router.post("/posts", tags=["Posts"], status_code=201)
-async def create_post_route(post: PostCreate):   
-  new_post = await create_post(post)
-  return new_post
-   
-
-# update post
-@router.put("/posts/{post_id}", tags=["Posts"], response_model=PostResponse)
-async def update_post_route(post: PostUpdate, post_id: int):    
-    updated_post = await update_post(post, post_id)
-    return updated_post
+router = APIRouter()            
             
-            
-# get all posts
-@router.get("/posts", tags=["Posts"], response_model=List[PostResponse])
-async def read_posts_route():
-    return await get_all_post()
+# Create post draft
+@router.post("/posts", tags=["Posts"],  response_model=PostResponse, status_code=201,)
+def create_post_draft_route(post_data: PostCreateDraft):
+    # For testing: hardcoded user ID
+    current_user_id = 5 # Test user
+    post_data_dict = post_data.model_dump()
+    new_post = create_post_draft(current_user_id, post_data_dict)
 
-# get a single post
-@router.get("/posts/{post_id}", tags=["Posts"], response_model=PostResponse)
-async def get_post_route(post_id: int):
-    post = await get_post(post_id)
+    return new_post
+
+ 
+# Publish post route
+@router.patch("/posts/{post_id}/publish", tags=["Posts"], response_model=PostResponse)
+async def publish_post_route(post_id:int):
+    # For testing: hardcoded user ID
+    current_user_id = 1 # Test user 
+
+    post = publish_post(current_user_id, post_id)
     return post
-    
-    
-# delete a post
-@router.delete("/posts/{post_id}", tags=["Posts"], status_code=204)
-async def delete_post(post_id: int):
-  await delete_post(post_id)
-  return 
 
 
 

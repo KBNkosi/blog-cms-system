@@ -1,27 +1,26 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 
-class PostBase(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
-    content: str = Field(..., min_length=1, max_length=5000)
+class PostCreateDraft(BaseModel):
+    title: str | None
+    content: str | None 
     
 
-class PostCreate(PostBase):
+class PostUpdateDraft(PostCreateDraft):
     pass
     
 
-class PostUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=1, max_length=200)
-    content: str | None = Field(default=None, min_length=1, max_length=5000)
-
-class Post(PostBase):
+class PostResponse(BaseModel):
     id: int
-    author_id: int
-    created_at: datetime
+    title: str
+    content: str
+    status: str
+    user_id: int
+    created_at: datetime 
     updated_at: datetime | None
+    published_at: datetime | None
 
-class PostResponse(Post):
-    pass
+
 
    
 
