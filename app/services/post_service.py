@@ -93,7 +93,7 @@ def get_post_for_owner(post_id: int, user_id: int)-> dict:
 
     return post
 
-# Function to get public/published post
+# Function to get published post
 def get_public_post(slug:str)-> dict:  
    for post in posts_db:
      if post.get("slug") == slug:

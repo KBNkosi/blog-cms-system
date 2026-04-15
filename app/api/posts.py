@@ -28,13 +28,11 @@ def get_post_for_owner_route(post_id:int):
 # search public post
 @router.get("/posts/search", tags=["Posts"], response_model=PostResponse, status_code=200)
 def search_public_post_route(q: str):
-    print(f"search query: {q}")
+    
     target_slug = slugify(q)
-    print(f"generated slug: {target_slug}")
+   
     
     post = get_public_post(target_slug)
-
-    print(f"found post: {post}")
 
     return post
 
