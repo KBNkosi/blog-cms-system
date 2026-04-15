@@ -16,7 +16,7 @@ class PostResponse(BaseModel):
     content: str
     status: str
     user_id: int
-    created_at: datetime 
+    created_at: datetime
     updated_at: datetime | None
     published_at: datetime | None
 

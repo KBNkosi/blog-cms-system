@@ -6,6 +6,7 @@ posts_db = [
     {
         "id": 1,
         "title": "Getting Started with FastAPI",
+        "slug": "getting-started-with-fastapi",
         "content": (
             "FastAPI is a modern, fast web framework for building APIs with Python. "
             "It's built on top of Starlette and Pydantic, providing automatic validation "
@@ -21,6 +22,7 @@ posts_db = [
     {
         "id": 2,
         "title": "I am there: features every developer should know",
+        "slug": "i-am-there:-features-every-developer-should-know",
         "content": (
             "Features that every developer should know. We'll also discuss project "
             "structure and testing strategies."
@@ -34,6 +36,7 @@ posts_db = [
     {
         "id": 3,
         "title": "Database Design Patterns",
+        "slug": "database-design-patterns",
         "content": (
             "Understanding database design patterns is crucial for building scalable "
             "applications. This post explores normalization, indexing strategies, "
@@ -67,23 +70,59 @@ def create_post_draft(current_user_id:int, draft_data: dict)-> dict:
     return new_post
 
 # Function to get post by id
-def get_post_by_id(post_id:int) -> dict | None:
+def get_post_by_id(post_id:int) -> dict:
     for post in posts_db:
         if post["id"] == post_id:
             return post
-    return None
+    raise HTTPException(status_code=404, detail="post not found")
 
 # Validate post ownership
 def validate_post_ownership(user_id:int, post_data:dict) -> None:
     if post_data["user_id"] != user_id:
         raise HTTPException(status_code=400, detail="cannot access another users'post")
 
+#Function to check status of the post
+def check_post_status(post) -> None:
+  if post["status"] != "draft":
+        raise HTTPException(status_code=400, detail="Post is already published")
+
+# Function to get post for the owner
+def get_post_for_owner(post_id: int, user_id: int)-> dict:
+    post = get_post_by_id(post_id)
+    validate_post_ownership(user_id, post)
+
+    return post
+
+# Function to get public/published post
+def get_public_post(slug:str)-> dict:  
+   for post in posts_db:
+     if post.get("slug") == slug:
+        if post.get("status") == "published":
+            return post
+        else:
+            raise HTTPException(status_code=403, detail="post is not public")
+
+   raise HTTPException(status_code=404, detail="post not found")
+  
+
+# Function to update post
+def update_post(post_id: int, user_id:int, post_data: dict) -> dict:
+    post = get_post_by_id(post_id)
+    validate_post_ownership(user_id, post)
+    check_post_status(post)
+
+    for field in ["title", "content"]:
+        if post_data[field] is not None:
+            post[field] = post_data[field]
+
+    post["updated_at"] = datetime.now()
+
+    return post
+
 
 # Function to validate post against publishing rules
 def validate_post_publishability(post_data: dict) -> None:
-    if post_data["status"] != "draft":
-        raise HTTPException(status_code=400, detail="Post is already published")
-    
+    check_post_status(post_data)
     title = post_data["title"].strip()
     content = post_data["content"].strip()
 
@@ -97,9 +136,6 @@ def validate_post_publishability(post_data: dict) -> None:
 def publish_post(current_user_id: int, post_id:int) -> dict:
 
     post = get_post_by_id(post_id)
-
-    if post is None:
-        raise HTTPException(status_code=404, detail="post not found")
 
     validate_post_ownership(current_user_id, post)    
     
