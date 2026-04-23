@@ -1,6 +1,6 @@
 from datetime import datetime
 from fastapi import HTTPException
-
+from slugify import slugify
 
 posts_db = [
     {
@@ -51,13 +51,54 @@ posts_db = [
     },
 ]
 
+# function to normalize empty strings and whitespaces
+def normalize_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    cleaned = value.strip()
+    return cleaned if cleaned else None
+
+
+# function to generate slug from title
+def generate_slug_from_title(title: str | None) -> str | None:
+    if title is None:
+        return None
+    
+    return slugify(title)
+
+# function to ensure title is unique before publishing
+def ensure_title_is_unique_for_publish(title, current_post_id):
+    normalized_title = normalize_text(title)
+
+    if normalized_title is None:
+        return
+
+    for post in posts_db:
+        if post["id"] == current_post_id:
+            continue
+
+        if post["status"] != "published":
+            continue
+
+        existing_title = normalize_text(post.get("title"))
+        if existing_title is None:
+            continue
+
+        if existing_title.lower() == normalized_title.lower():
+            raise HTTPException(status_code=400, detail="a published post with this title already exists")
+
 # create post draft
 def create_post_draft(current_user_id:int, draft_data: dict)-> dict:
-    new_id = max(post["id"] for post in posts_db) + 1
+    new_id = max((post["id"] for post in posts_db), default=0) + 1
+    clean_title = normalize_text(draft_data.get("title"))
+    clean_content = normalize_text(draft_data.get("content"))
+    
     new_post = {
         "id": new_id,
-        "title": draft_data.get("title"),
-        "content": draft_data.get("content"),
+        "title": clean_title,
+        "slug": generate_slug_from_title(clean_title),
+        "content": clean_content,
         "status": "draft",
         "user_id": current_user_id,
         "created_at": datetime.now(),
@@ -76,31 +117,27 @@ def get_post_by_id(post_id:int) -> dict:
             return post
     raise HTTPException(status_code=404, detail="post not found")
 
-# Validate post ownership
+# Function to validate post ownership
 def validate_post_ownership(user_id:int, post_data:dict) -> None:
     if post_data["user_id"] != user_id:
-        raise HTTPException(status_code=400, detail="cannot access another users'post")
+        raise HTTPException(status_code=403, detail="cannot access another user's post")
 
-#Function to check status of the post
-def check_post_status(post) -> None:
+#Function to check post status is draft
+def ensure_post_is_draft(post) -> None:
   if post["status"] != "draft":
-        raise HTTPException(status_code=400, detail="Post is already published")
+        raise HTTPException(status_code=400, detail="post is not in draft state")
 
 # Function to get post for the owner
 def get_post_for_owner(post_id: int, user_id: int)-> dict:
     post = get_post_by_id(post_id)
     validate_post_ownership(user_id, post)
-
     return post
 
 # Function to get published post
 def get_public_post(slug:str)-> dict:  
    for post in posts_db:
-     if post.get("slug") == slug:
-        if post.get("status") == "published":
-            return post
-        else:
-            raise HTTPException(status_code=403, detail="post is not public")
+     if post.get("slug") == slug and post.get("status") == "published":
+        return post
 
    raise HTTPException(status_code=404, detail="post not found")
   
@@ -109,39 +146,48 @@ def get_public_post(slug:str)-> dict:
 def update_post(post_id: int, user_id:int, post_data: dict) -> dict:
     post = get_post_by_id(post_id)
     validate_post_ownership(user_id, post)
-    check_post_status(post)
+    ensure_post_is_draft(post)
+
+    title_was_provided = "title" in post_data
 
     for field in ["title", "content"]:
-        if post_data[field] is not None:
-            post[field] = post_data[field]
+        if field in post_data:
+            post[field] = normalize_text(post_data[field])
+    
+    if title_was_provided:
+        post["slug"] = generate_slug_from_title(post["title"])
 
     post["updated_at"] = datetime.now()
-
     return post
 
 
 # Function to validate post against publishing rules
 def validate_post_publishability(post_data: dict) -> None:
-    check_post_status(post_data)
-    title = post_data["title"].strip()
-    content = post_data["content"].strip()
+    title = normalize_text(post_data.get("title")) 
+    content = normalize_text(post_data.get("content"))
 
     if not title:
-        raise HTTPException(status_code=400, detail="Title cannot be empty")
+        raise HTTPException(status_code=400, detail="title cannot be empty")
+
+    if not content:
+         raise HTTPException(status_code=400, detail="content cannot be empty")
+
     if len(content) < 50:
-        raise HTTPException(status_code=400, detail="Content cannot be less than 50 characters long")
+        raise HTTPException(status_code=400, detail="content must be at least 50 characters long")
         
 
 # Publish Post
 def publish_post(current_user_id: int, post_id:int) -> dict:
-
     post = get_post_by_id(post_id)
-
-    validate_post_ownership(current_user_id, post)    
-    
+    validate_post_ownership(current_user_id, post)
+    ensure_post_is_draft(post)    
     validate_post_publishability(post)
-
+    ensure_title_is_unique_for_publish(post["title"], post["id"])
+    
+    # Finalize slug from the validated, normalized title.
+    post["slug"] = generate_slug_from_title(post["title"])
     post["status"] = "published"
+    post["updated_at"] = datetime.now()
     post["published_at"] = datetime.now()
 
     return post

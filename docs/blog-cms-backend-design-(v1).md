@@ -46,10 +46,11 @@ Fields:
 - id: integer (primary key)
 - title: string (nullable)
 - content: text (nullable)
+- slug: string (nullable)
 - status: string (default = "draft")
 - user_id: foreign key → users.id
 - created_at: datetime
-- updated_at: datetime
+- updated_at: datetime (nullable)
 - published_at: datetime (nullable)
 
 ---
@@ -74,24 +75,47 @@ Note:
 
 ## 8. Core Rules
 
+### Ownership and Access
 - Only authenticated users can create and manage posts
 - Every post must belong to a user
-- Drafts can exist with incomplete data
-- A post can only be published if:
-  - title is non-empty
-  - content length ≥ 50 characters
-- Only published posts are publicly visible
 - Only the owner can edit or delete a post
+- Only published posts are publicly visible
+
+### Draft Rules
+- Drafts can exist with incomplete data
+- `title`, `content`, and `slug` may be `null` while a post is still a draft
+- Whitespace-only `title` or `content` values are normalized to `null`
+- If a draft has a valid title, a slug is generated from that title
+- If a draft title changes, the slug is regenerated while the post is still in draft state
+- If a draft title becomes empty after normalization, the slug becomes `null`
+
+### Publish Rules
+A post can only be published if:
+- title is non-empty after normalization
+- content is non-empty after normalization
+- content length is at least 50 characters
+- status is currently `draft`
+- the title is unique among published posts
+
+### Slug Rules
+- Slug is derived from the normalized title
+- Slug may exist during the draft phase
+- Slug is finalized at publish time
+- In V1, published posts are not editable. If published post editing is added later, the slug should remain stable by default and should not automatically change when the title is updated.
 
 ---
 
 ## 9. Visibility Rules
 
-- Draft posts:
-  - Only accessible by the owner
+### Draft Posts
+- Only accessible by the owner
 
-- Published posts:
-  - Accessible by any visitor (public)
+### Published Posts
+- Accessible by any visitor (public)
+
+### Public Access Behavior
+- Public queries should only return published posts
+- Draft posts should not be exposed through the public access flow
 
 ---
 
@@ -102,7 +126,24 @@ Note:
 
 ---
 
-## 11. API Input Schemas (Pydantic)
+## 11. Data Normalization Rules
+
+Before validation or persistence:
+- Leading and trailing whitespace is removed from `title` and `content`
+- Empty strings and whitespace-only strings are converted to `null`
+
+Examples:
+- `"  FastAPI Guide  "` → `"FastAPI Guide"`
+- `"   "` → `null`
+- `""` → `null`
+
+Purpose:
+- keep stored data consistent
+- avoid treating `""`, `"   "`, and `null` as different meanings of "empty"
+
+---
+
+## 12. API Input Schemas (Pydantic)
 
 ### PostCreateDraft
 - title: optional string
@@ -116,6 +157,7 @@ Note:
 - id
 - title
 - content
+- slug
 - status
 - user_id
 - created_at
@@ -124,11 +166,12 @@ Note:
 
 ---
 
-## 12. Core Service Methods
+## 13. Core Service Methods
 
 ### create_draft(current_user, data)
 - assign user_id from authenticated user
-- set title/content if provided
+- normalize title/content
+- generate slug if title exists
 - set status = "draft"
 - set created_at
 - save post
@@ -140,7 +183,10 @@ Note:
 - check post exists
 - check current user owns the post
 - check status == "draft"
+- normalize updated fields
 - update title/content if provided
+- regenerate slug if title changes
+- set slug = `null` if title becomes empty after normalization
 - set updated_at
 - save post
 
@@ -151,8 +197,11 @@ Note:
 - check post exists
 - check current user owns the post
 - check status == "draft"
-- validate title is non-empty
+- validate title is non-empty after normalization
+- validate content is non-empty after normalization
 - validate content length ≥ 50
+- validate title uniqueness among published posts
+- finalize slug from title
 - set status = "published"
 - set published_at
 - set updated_at
@@ -168,15 +217,14 @@ Note:
 
 ---
 
-### get_public_post(post_id)
-- fetch post by id
-- check post exists
-- check status == "published"
-- return post
+### get_public_post(slug)
+- fetch post by slug
+- return post only if status == "published"
+- otherwise treat as not publicly available
 
 ---
 
-## 13. Edge Cases
+## 14. Edge Cases
 
 ### Ownership / Permission
 - User cannot access another user's draft
@@ -192,16 +240,25 @@ Note:
 
 ### Validation Errors
 - Cannot publish post with empty title
+- Cannot publish post with empty content
 - Cannot publish post with content < 50 characters
+- Cannot publish post if another published post already has the same normalized title
+
+### Slug / Title Lifecycle
+- Draft may have `slug = null` if title is missing
+- Draft slug changes when draft title changes
+- Published slug is treated as stable in V1
 
 ---
 
-## 14. V1 Scope Decisions
+## 15. V1 Scope Decisions
 
 Included:
 - User + Post system
 - Draft → Publish lifecycle
 - Public read access
+- Slug generation and stabilization
+- Title uniqueness enforced at publish time
 
 Excluded:
 - Comments
@@ -210,16 +267,20 @@ Excluded:
 - Sharing
 - View tracking
 - Revisions/version history
+- Published post editing
+- Slug history / redirects
 
 Reason:
 Keep system focused on core content workflow and reduce complexity.
 
 ---
 
-## 15. Open Questions (Future Iteration)
+## 16. Open Questions (Future Iteration)
 
 - Should published posts be allowed to revert to draft?
 - Should admin roles be introduced with broader permissions?
 - Should soft delete be implemented instead of hard delete?
-- Should public posts use slugs instead of IDs?
+- Should published posts be editable?
+- If published titles change later, should slugs stay fixed or support redirects?
+- Should uniqueness be enforced on title, slug, or both in later versions?
 - Should versioning/revisions be supported?

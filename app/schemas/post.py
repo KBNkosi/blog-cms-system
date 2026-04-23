@@ -12,8 +12,9 @@ class PostUpdateDraft(PostCreateDraft):
 
 class PostResponse(BaseModel):
     id: int
-    title: str
-    content: str
+    title: str | None
+    content: str | None
+    slug: str | None
     status: str
     user_id: int
     created_at: datetime
