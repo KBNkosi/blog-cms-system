@@ -15,7 +15,7 @@ The goal is to design the system around:
 
 ## 2. Core Domains
 
-A real blog system is not one thing — it's multiple subsystems.
+A real blog system is not one thing; it's multiple subsystems.
 
 | Domain | Responsibilities |
 |--------|------------------|
@@ -32,7 +32,7 @@ A real blog system is not one thing — it's multiple subsystems.
 
 ### Core Domain: Content
 
-The system starts with the **Content** domain because that is where the main business behavior lives.
+The system starts with the **Content** domain because that is where the main business behaviour lives.
 
 Current focus:
 - creating drafts
@@ -52,7 +52,7 @@ It will be introduced after the content rules and data flow are stable.
 
 ## 4. Architecture Style
 
-**Modular Monolith** — structured internally into clear layers and domains, but deployed as one unit.
+**Modular Monolith**- structured internally into clear layers and domains, but deployed as one unit.
 
 ```text
 /app
