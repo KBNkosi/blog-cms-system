@@ -1,4 +1,4 @@
-# Blog CMS – Backend Design (V1)
+# Blog CMS - Backend Design (V1)
 
 ## 1. System Purpose
 A blog CMS that allows users to create, manage, and publish written content.
