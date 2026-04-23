@@ -279,7 +279,6 @@ Keep system focused on core content workflow and reduce complexity.
 
 - Should published posts be allowed to revert to draft?
 - Should admin roles be introduced with broader permissions?
-- Should soft delete be implemented instead of hard delete?
 - Should published posts be editable?
 - If published titles change later, should slugs stay fixed or support redirects?
 - Should uniqueness be enforced on title, slug, or both in later versions?
