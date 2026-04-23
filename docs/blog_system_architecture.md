@@ -2,7 +2,7 @@
 
 ## 1. Mental Model
 
-> Don't think "I'm building authentication." Think: **I'm building a content platform with multiple domains, and I should start with the core domain first.**
+> Don't think "I'm building a blog." Think: **I'm building a content platform with multiple domains, and I should start with the core domain first.**
 
 The goal is to design the system around:
 - business rules
