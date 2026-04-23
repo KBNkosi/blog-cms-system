@@ -2,38 +2,67 @@
 
 ## 1. Mental Model
 
-> Don't think "I'm building authentication." Think **"I'm building a content platform system with multiple domains."**
+> Don't think "I'm building authentication." Think: **I'm building a content platform with multiple domains, and I should start with the core domain first.**
+
+The goal is to design the system around:
+- business rules
+- state transitions
+- ownership
+- validation boundaries
+- clear layering
 
 ---
 
 ## 2. Core Domains
 
-A real blog system is not one thing — it's multiple subsystems:
+A real blog system is not one thing — it's multiple subsystems.
 
 | Domain | Responsibilities |
-|--------|-----------------|
-| **User** | Users, Profiles, Roles (admin, author, reader) |
-| **Auth** | Login / Register, JWT Tokens, Permissions |
-| **Content** | Posts, Drafts, Publishing, Editing |
-| **Engagement** | Comments, Likes, Bookmarks |
-| **Discovery** | Search, Tags, Categories, Feed |
-| **System** | Logging, Error handling, Rate limiting, Background jobs |
+|--------|------------------|
+| **User** | Users, profiles, roles |
+| **Auth** | Registration, login, identity verification, access control |
+| **Content** | Drafts, publishing, post visibility, slug lifecycle, content validation |
+| **Engagement** | Comments, likes, bookmarks |
+| **Discovery** | Search, tags, categories, feed |
+| **System** | Logging, error handling, rate limiting, background jobs |
 
 ---
 
-## 3. Architecture Style
+## 3. Core Domain Focus
 
-**Modular Monolith** — structured internally like microservices, deployed as one unit.
+### Core Domain: Content
 
-```
+The system starts with the **Content** domain because that is where the main business behavior lives.
+
+Current focus:
+- creating drafts
+- updating drafts
+- publishing posts
+- controlling public visibility
+- enforcing ownership
+- managing slug lifecycle
+
+### Supporting Domain: Auth
+
+Authentication is important, but it supports the content workflow rather than defining it.
+
+It will be introduced after the content rules and data flow are stable.
+
+---
+
+## 4. Architecture Style
+
+**Modular Monolith** — structured internally into clear layers and domains, but deployed as one unit.
+
+```text
 /app
-  /api              → Routes (controllers)
+  /api              → Routes / controllers
   /services         → Business logic
   /models           → Database models
-  /schemas          → Request/response validation
-  /repositories     → DB access layer
+  /schemas          → Request / response validation
+  /repositories     → Data access layer (planned)
 
-  /core             → Config, security, utils
+  /core             → Config, security, utilities
   /domains
       /auth
       /users
@@ -47,7 +76,7 @@ A real blog system is not one thing — it's multiple subsystems:
 
 ---
 
-## 4. Request Flow
+## 5. Request Flow
 
 Every request follows this flow:
 
@@ -57,22 +86,23 @@ Client → API Route → Service Layer → Repository → Database
                     Business Logic
 ```
 
-### Example: `POST /posts`
+### Current Implementation Emphasis
 
-```
-→ Route handles request
-→ Service validates business rules
-→ Repository saves to DB
-→ Response returned
-```
+The service layer is stabilized first, because it contains the core rules:
 
-> This separation is what makes systems scalable later.
+- ownership checks
+- draft vs published state rules
+- publish validation
+- slug handling
+- visibility rules
+
+Only after the rules are stable should the same behavior be wired through routes and persistence.
 
 ---
 
-## 5. Core Data Entities
+## 6. Core Data Entities
 
-Think in **entities**, not endpoints.
+Think in entities, not endpoints.
 
 ```
 users
@@ -80,12 +110,26 @@ posts
 comments
 likes
 tags
-post_tags   ← many-to-many join table
+post_tags
 ```
+
+### Current Entity Focus
+
+Right now the main entity is:
+
+**Post**
+
+A user-owned piece of written content that:
+
+- starts as a private draft
+- may have incomplete data while in draft
+- can be published for public access
+- gets a slug derived from title
+- uses slug as public identity once published
 
 ---
 
-## 6. System Layers
+## 7. System Layers
 
 ```
 ┌─────────────────────────────────┐
@@ -99,90 +143,160 @@ post_tags   ← many-to-many join table
 └─────────────────────────────────┘
 ```
 
----
+### Layer Responsibilities
 
-## 7. Build Phases
-
-### Phase 1 — Content System *(Start Here)*
-
-> Focus on data flow and structure before adding security concerns.
-
-- [ ] Create post
-- [ ] Get all posts (with pagination)
-- [ ] Get single post
-- [ ] Update post
-- [ ] Delete post
-- [ ] Basic request validation
+- **API Layer**: request handling and response mapping
+- **Service Layer**: business rules and workflows
+- **Repository Layer**: persistence logic
+- **Database Layer**: storage
 
 ---
 
-### Phase 2 — Auth System
+## 8. Current Content Rules
 
-> Auth is a cross-cutting concern. Build it once you understand the system.
+### Draft Rules
+
+- Drafts may have incomplete data
+- title, content, and slug may be null in draft state
+- Whitespace-only values are normalized to null
+- If a draft has a valid title, a slug is generated from that title
+- If the draft title changes, the slug updates while the post is still draft
+
+### Publish Rules
+
+A post can only be published if:
+
+- it is in draft state
+- the title is non-empty after normalization
+- the content is non-empty after normalization
+- the content length is at least 50 characters
+- the title is unique among published posts
+- the current user owns the post
+
+### Visibility Rules
+
+- Draft posts are private to the owner
+- Only published posts are publicly accessible
+- Public access uses slug, not post ID
+
+---
+
+## 9. Build Phases
+
+### Phase 1 — Content Workflow ✅
+
+Focus on the core content lifecycle before authentication and persistence complexity.
+
+Implemented / stabilized:
+
+- ✅ Create draft
+- ✅ Update draft
+- ✅ Publish post
+- ✅ Get post for owner
+- ✅ Get published post by slug
+- ✅ Input normalization
+- ✅ Ownership checks
+- ✅ Publish validation rules
+- ✅ Slug lifecycle handling
+- ✅ Service-layer tests with pytest
+
+---
+
+### Phase 2 — Persistence Layer 🔄
+
+Replace in-memory storage with database-backed persistence.
+
+Next goals:
+
+- [ ] SQLAlchemy models
+- [ ] Repository layer
+- [ ] Database session integration
+- [ ] Migration setup
+
+---
+
+### Phase 3 — Auth System
+
+Introduce identity and access control after the content workflow is stable.
+
+Planned:
 
 - [ ] User registration
 - [ ] User login
-- [ ] JWT token issuance & validation
-- [ ] Role-based access control (admin, author, reader)
+- [ ] JWT token issuance and validation
 - [ ] Protected routes
+- [ ] Role-based access control
 
 ---
 
-### Phase 3 — Engagement
+### Phase 4 — Engagement
 
-- [ ] Comments (create, read, delete)
-- [ ] Likes (toggle)
+- [ ] Comments
+- [ ] Likes
 - [ ] Bookmarks
 
 ---
 
-### Phase 4 — Discovery
+### Phase 5 — Discovery
 
-- [ ] Tags & categories
-- [ ] Full-text search
-- [ ] Feed (latest / trending posts)
-- [ ] Filtering & sorting
+- [ ] Tags and categories
+- [ ] Search
+- [ ] Filtering and sorting
+- [ ] Feed
 
 ---
 
-### Phase 5 — System Design
+### Phase 6 — System Design
 
-- [ ] Caching (Redis)
-- [ ] Background jobs (emails, notifications)
+- [ ] Caching
+- [ ] Background jobs
 - [ ] Rate limiting
-- [ ] Logging & monitoring
+- [ ] Logging and monitoring
 
 ---
 
-## 8. Why Posts Before Auth?
+## 10. Why Content Before Auth?
 
-| Start with Auth | Start with Posts |
-|-----------------|-----------------|
-| Build security without understanding the system | Understand data flow first |
-| Auth becomes an over-engineered bottleneck | Auth slots in cleanly later |
-| Hard to test business logic in isolation | Easy to test and iterate quickly |
+| Start with Auth | Start with Content |
+|-----------------|-------------------|
+| Build identity/security before the core workflow is understood | Understand the business workflow first |
+| Harder to isolate core content rules | Easier to test and refine the main system behavior |
+| Increases complexity early | Lets auth slot into a clearer system later |
 
-> Auth is not core business logic — it's infrastructure. Defer it intentionally.
+### Reasoning
+
+For this project, Content is the core domain and Auth is a supporting domain.
+
+That means the better sequence is:
+
+1. define the content workflow
+2. stabilize business rules
+3. test service logic
+4. then add auth and persistence
 
 ---
 
-## 9. Technology Stack
+## 11. Technology Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Framework | FastAPI (Python) |
-| Database | PostgreSQL |
-| ORM | SQLAlchemy |
+|-------|------------|
+| Framework | FastAPI |
 | Validation | Pydantic |
-| Auth | JWT (python-jose) |
-| Caching *(Phase 5)* | Redis |
-| Background Jobs *(Phase 5)* | Celery or FastAPI BackgroundTasks |
+| Current storage | In-memory Python structures |
+| Database (next) | SQLite → PostgreSQL |
+| ORM | SQLAlchemy |
+| Auth (planned) | JWT / python-jose |
+| Testing | Pytest |
+| Caching (later) | Redis |
+| Background Jobs (later) | Celery or FastAPI BackgroundTasks |
 
 ---
 
-## 10. Key Principles
+## 12. Key Principles
 
-- **Separation of concerns** — routes do routing, services do logic, repos do data access
-- **Domain-driven structure** — code is organized by business domain, not technical layer alone
-- **Iterative complexity** — start simple, add complexity only when the foundation is solid
-- **Testability first** — each layer can be tested independently
+- **Separation of concerns** — routes do routing, services do logic, repositories do persistence
+- **Domain-first thinking** — define entities, rules, and workflows before expanding features
+- **State-driven design** — draft and published are not just labels; they define behavior
+- **Validation boundaries** — drafts are flexible, publish is strict
+- **Testability first** — service logic should be testable before routes and persistence
+- **Iterative complexity** — build the foundation first, then add auth, persistence, and system concerns

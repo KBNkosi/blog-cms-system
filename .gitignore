@@ -10,8 +10,8 @@ __pycache__
 *.db 
 
 # Alembic migrations (generated files)
-app/database/migrations/versions/*.py
-!app/database/migrations/versions/__init__.py
+app/repositories/migrations/versions/*.py
+!app/repositories/migrations/versions/__init__.py
 
 # VSCode files
 .vscode/

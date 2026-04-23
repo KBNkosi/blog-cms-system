@@ -22,7 +22,7 @@ posts_db = [
     {
         "id": 2,
         "title": "I am there: features every developer should know",
-        "slug": "i-am-there:-features-every-developer-should-know",
+        "slug": "i-am-there-features-every-developer-should-know",
         "content": (
             "Features that every developer should know. We'll also discuss project "
             "structure and testing strategies."

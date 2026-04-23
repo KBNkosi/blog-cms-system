@@ -21,6 +21,19 @@ def create_post_draft_route(post_data: PostCreateDraft):
     new_post = create_post_draft(TEST_USER_ID, post_data_dict)
     return new_post
 
+# Update post
+@router.patch("/posts/{post_id}", tags=["Posts"], response_model=PostResponse, status_code=200)
+def update_post_route(post_id: int, post_data:PostUpdateDraft):
+    post_data_dict = post_data.model_dump(exclude_unset=True)
+    updated_post = update_post(post_id, TEST_USER_ID, post_data_dict)
+    return updated_post
+
+# Publish post route
+@router.patch("/posts/{post_id}/publish", tags=["Posts"], response_model=PostResponse)
+def publish_post_route(post_id:int):
+    post = publish_post(TEST_USER_ID, post_id)
+    return post
+
 # Get post for owner
 @router.get("/posts/{post_id}", tags=["Posts"], response_model=PostResponse, status_code=200)
 def get_post_for_owner_route(post_id:int):
@@ -35,19 +48,9 @@ def search_public_post_route(slug: str):
 
     
 
-# Update post
-@router.patch("/posts/{post_id}", tags=["Posts"], response_model=PostResponse, status_code=200)
-def update_post_route(post_id: int, post_data:PostUpdateDraft):
-    post_data_dict = post_data.model_dump(exclude_unset=True)
-    updated_post = update_post(post_id, TEST_USER_ID, post_data_dict)
-    return updated_post
+
 
  
-# Publish post route
-@router.patch("/posts/{post_id}/publish", tags=["Posts"], response_model=PostResponse)
-def publish_post_route(post_id:int):
-    post = publish_post(TEST_USER_ID, post_id)
-    return post
 
 
 

@@ -6,3 +6,4 @@ alembic
 pytest
 uvicorn
 aiosqlite
+python-slugify
