@@ -183,7 +183,7 @@ A post can only be published if:
 
 ## 9. Build Phases
 
-### Phase 1 — Content Workflow ✅
+### Phase 1 - Content Workflow ✅
 
 Focus on the core content lifecycle before authentication and persistence complexity.
 
@@ -202,7 +202,7 @@ Implemented / stabilized:
 
 ---
 
-### Phase 2 — Persistence Layer 🔄
+### Phase 2 - Persistence Layer 🔄
 
 Replace in-memory storage with database-backed persistence.
 
@@ -215,7 +215,7 @@ Next goals:
 
 ---
 
-### Phase 3 — Auth System
+### Phase 3 - Auth System
 
 Introduce identity and access control after the content workflow is stable.
 
@@ -229,7 +229,7 @@ Planned:
 
 ---
 
-### Phase 4 — Engagement
+### Phase 4 - Engagement
 
 - [ ] Comments
 - [ ] Likes
@@ -237,7 +237,7 @@ Planned:
 
 ---
 
-### Phase 5 — Discovery
+### Phase 5 - Discovery
 
 - [ ] Tags and categories
 - [ ] Search
@@ -246,7 +246,7 @@ Planned:
 
 ---
 
-### Phase 6 — System Design
+### Phase 6 - System Design
 
 - [ ] Caching
 - [ ] Background jobs
@@ -294,9 +294,9 @@ That means the better sequence is:
 
 ## 12. Key Principles
 
-- **Separation of concerns** — routes do routing, services do logic, repositories do persistence
-- **Domain-first thinking** — define entities, rules, and workflows before expanding features
-- **State-driven design** — draft and published are not just labels; they define behavior
-- **Validation boundaries** — drafts are flexible, publish is strict
-- **Testability first** — service logic should be testable before routes and persistence
-- **Iterative complexity** — build the foundation first, then add auth, persistence, and system concerns
+- **Separation of concerns** - routes do routing, services do logic, repositories do persistence
+- **Domain-first thinking** - define entities, rules, and workflows before expanding features
+- **State-driven design** - draft and published are not just labels; they define behavior
+- **Validation boundaries** - drafts are flexible, publish is strict
+- **Testability first** - service logic should be testable before routes and persistence
+- **Iterative complexity** - build the foundation first, then add auth, persistence, and system concerns
